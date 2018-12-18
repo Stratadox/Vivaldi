@@ -550,6 +550,53 @@ of indexation is done on a class level, the second based on identifier.
 
 # Saving the updates
 
+## Saviour
+A [saviour](https://github.com/Stratadox/Saviour)* takes the list of changes and 
+determines which saving mechanism to pass the individual entity changes to.
+ 
+Multiple savers can be configured per entity, to update multiple data sources at 
+the same time. This allows to, for example, write all the data to the database, 
+some of it to the cache and some of it to a full text search engine.
+
+The individual writers are preconfigured to respond to certain keys from the 
+[state changes](#state-management). For instance, a [sql updater](#sql-updater) 
+might respond to the reduction of a `count(array:cars)` response key by 
+generating the `delete` clause needed to remove the data from the unused value 
+objects, or by removing the references from a "join table" - depending on 
+whether the cars are entities or value objects in the domain model.
+Which strategy to follow is a decision that can in most cases be made at deploy 
+time, although some runtime parsing may be required for more complex object 
+structures.
+
+### Redis writer
+The [redis writer](https://github.com/Stratadox/RedisWriter)* uses a [redis 
+client](https://github.com/phpredis/phpredis) to update the data of an entity. 
+
+### Session writer
+The [session writer](https://github.com/Stratadox/SessionWriter)* loads entity 
+data from the [session](https://secure.php.net/manual/en/book.session.php).
+
+### Graph updater
+The [graph updater](https://github.com/Stratadox/GraphUpdater)* updates the 
+graph using a [neo4j client](https://github.com/graphaware/neo4j-php-client).
+
+### SOLR updater
+The [SOLR updater](https://github.com/Stratadox/SolrUpdater)* updates the SOLR 
+data source.
+
+### Sql updater
+The [sql updater](https://github.com/Stratadox/SqlUpdater)* translates the changes 
+to entities into insert-, update- and delete statements.
+
+### Misc writers
+Other writers might include:
+- A REST API writer, using `post` and `put`
+- A mongodb writer
+- CSV?
+- Excel?
+- A/R orms?
+- Etc.
+
 ## Orphan removal
 Orphaned value objects are killed off by default; for entities it is only rarely 
 required.
@@ -606,53 +653,6 @@ It works by stripping the reference count from the input, keeping track of it
 privately. On the saving side, it combines the original count with the removals 
 from the result. The decorated saviour receives an adapted result with the 
 orphans removed and the updated reference count added.
-
-## Saviour
-A [saviour](https://github.com/Stratadox/Saviour)* takes the list of changes and 
-determines which saving mechanism to pass the individual entity changes to.
- 
-Multiple savers can be configured per entity, to update multiple data sources at 
-the same time. This allows to, for example, write all the data to the database, 
-some of it to the cache and some of it to a full text search engine.
-
-The individual writers are preconfigured to respond to certain keys from the 
-[state changes](#state-management). For instance, a [sql updater](#sql-updater) 
-might respond to the reduction of a `count(array:cars)` response key by 
-generating the `delete` clause needed to remove the data from the unused value 
-objects, or by removing the references from a "join table" - depending on 
-whether the cars are entities or value objects in the domain model.
-Which strategy to follow is a decision that can in most cases be made at deploy 
-time, although some runtime parsing may be required for more complex object 
-structures.
-
-### Redis writer
-The [redis writer](https://github.com/Stratadox/RedisWriter)* uses a [redis 
-client](https://github.com/phpredis/phpredis) to update the data of an entity. 
-
-### Session writer
-The [session writer](https://github.com/Stratadox/SessionWriter)* loads entity 
-data from the [session](https://secure.php.net/manual/en/book.session.php).
-
-### Graph updater
-The [graph updater](https://github.com/Stratadox/GraphUpdater)* updates the 
-graph using a [neo4j client](https://github.com/graphaware/neo4j-php-client).
-
-### SOLR updater
-The [SOLR updater](https://github.com/Stratadox/SolrUpdater)* updates the SOLR 
-data source.
-
-### Sql updater
-The [sql updater](https://github.com/Stratadox/SqlUpdater)* translates the changes 
-to entities into insert-, update- and delete statements.
-
-### Misc writers
-Other writers might include:
-- A REST API writer, using `post` and `put`
-- A mongodb writer
-- CSV?
-- Excel?
-- A/R orms?
-- Etc.
 
 # Mapping the domain
 Yeah, that will be the hardest part. Or, at least, the hardest part to automate, 
